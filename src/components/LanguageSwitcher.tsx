@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Button } from "./ui/button";
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
@@ -6,12 +7,18 @@ const LanguageSwitcher = () => {
   const toggleLanguage = () => {
     const newLang = i18n.language === "en" ? "bn" : "en";
     i18n.changeLanguage(newLang);
+    localStorage.setItem("language", newLang); // persist selection
   };
 
   return (
-    <button onClick={toggleLanguage} className="text-sm text-blue-500">
-      {i18n.language === "en" ? "বাংলা" : "English"}
-    </button>
+    <Button
+      onClick={toggleLanguage}
+      size="sm"
+      variant="ghost"
+      className="cursor-pointer"
+    >
+      {i18n.language === "en" ? "Bn" : "En"}
+    </Button>
   );
 };
 

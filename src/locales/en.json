@@ -1,0 +1,10 @@
+{
+  "welcome": "Welcome Back",
+  "login_to_account": "Login to your account",
+  "dashboard": "Dashboard",
+  "parcels": "Parcels",
+
+  "not_found_title": "Oops! Lost in Cyberspace",
+  "not_found_description": "Looks like you've ventured into the unknown digital realm.",
+  "not_found_button": "Return to website"
+}

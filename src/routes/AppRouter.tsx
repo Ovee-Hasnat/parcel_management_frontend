@@ -1,36 +1,60 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
-import Login from "../pages/auth/Login";
+import DashboardLayout from "@/layouts/DashboardLayout";
+import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Registration";
+import DashboardRedirect from "@/pages/dashboard/DashboardRedirect";
 
-// import DashboardLayout from "../layouts/DashboardLayout";
-// import Dashboard from "../pages/Dashboard";
-// import Parcels from "../pages/Parcels";
-// import NotFound from "../pages/NotFound";
-// import PrivateRoute from "../components/PrivateRoute";
+// import Parcels from "@/pages/Parcels";
+// import NotFound from "@/pages/NotFound";
+
+import PrivateRoute from "./PrivateRoute";
+import PublicRoute from "./PublicRoute";
+import RoleGuard from "./RoleGuard";
+import CustomerDashboard from "@/pages/dashboard/CustomerDashboard";
+import AgentDashboard from "@/pages/dashboard/AgentDashboard";
+import AdminDashboard from "@/pages/dashboard/AdminDashboard";
+import NotFound from "@/pages/NotFound";
 
 const AppRouter = () => (
   <BrowserRouter>
     <Routes>
-      {/* Wrap everything in MainLayout */}
       <Route element={<MainLayout />}>
-        {/* Redirect '/' to /login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Base route → login or dashboard */}
+        <Route path="/" element={<DashboardRedirect />} />
 
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* Public Routes (only when logged out) */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
 
         {/* Protected Routes */}
-        {/* <Route element={<PrivateRoute />}>
+        <Route
+          element={<PrivateRoute allowed={["customer", "agent", "admin"]} />}
+        >
           <Route element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="parcels" element={<Parcels />} />
+            <Route path="/dashboard" element={<DashboardRedirect />} />
+
+            <Route element={<RoleGuard role="customer" />}>
+              <Route
+                path="dashboard/customer"
+                element={<CustomerDashboard />}
+              />
+            </Route>
+
+            <Route element={<RoleGuard role="agent" />}>
+              <Route path="dashboard/agent" element={<AgentDashboard />} />
+            </Route>
+
+            <Route element={<RoleGuard role="admin" />}>
+              <Route path="dashboard/admin" element={<AdminDashboard />} />
+            </Route>
           </Route>
-        </Route> */}
+        </Route>
 
         {/* 404 - not found */}
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   </BrowserRouter>

@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 // Define form data shape
 interface RegistrationFormData {
@@ -26,13 +30,33 @@ export function RegistrationForm() {
     },
   });
 
-  const onSubmit = (data: RegistrationFormData) => {
-    const formattedData = {
-      ...data,
-      role: data.role ? "agent" : "customer",
-    };
-    console.log(formattedData);
-    // TODO: call API here
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { register: registerUser, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const onSubmit = async (data: RegistrationFormData) => {
+    setErrorMessage(null);
+
+    try {
+      const payload = {
+        ...data,
+        role: data.role ? "agent" : "customer",
+      };
+
+      const user = await registerUser(payload);
+
+      // redirect based on role
+      if (user.role === "admin") navigate("/dashboard/admin");
+      else if (user.role === "agent") navigate("/dashboard/agent");
+      else navigate("/dashboard/customer");
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong. Please try again.";
+      setErrorMessage(msg);
+    }
   };
 
   return (
@@ -91,8 +115,8 @@ export function RegistrationForm() {
                 {...register("password", {
                   required: "Password is required",
                   minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters",
+                    value: 6,
+                    message: "Password must be at least 6 characters",
                   },
                 })}
               />
@@ -121,9 +145,23 @@ export function RegistrationForm() {
               </Label>
             </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full">
-              Register
+            {/* error message from server */}
+            {errorMessage && (
+              <p className="text-red-500 text-sm font-semibold">
+                {errorMessage}
+              </p>
+            )}
+
+            {/* Submit */}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Registering...
+                </span>
+              ) : (
+                "Register"
+              )}
             </Button>
 
             {/* Link to Login */}
